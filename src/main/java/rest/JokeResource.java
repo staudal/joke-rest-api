@@ -2,22 +2,22 @@ package rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dtos.RenameMeDTO;
-import entities.RenameMe;
+import dtos.ChuckDTO;
+import dtos.DadDTO;
+import dtos.MyJokeDTO;
 import utils.EMF_Creator;
-import facades.FacadeExample;
+import facades.JokeFacade;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 //Todo Remove or change relevant parts before ACTUAL use
-@Path("xxx")
-public class RenameMeResource {
+@Path("jokes")
+public class JokeResource {
 
     private static final EntityManagerFactory EMF = EMF_Creator.createEntityManagerFactory();
-       
-    private static final FacadeExample FACADE =  FacadeExample.getFacadeExample(EMF);
+    private static final JokeFacade FACADE =  JokeFacade.getFacadeExample(EMF);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
             
     @GET
@@ -27,19 +27,34 @@ public class RenameMeResource {
     }
 
     @GET
-    @Path("count")
+    @Path("chuck")
     @Produces({MediaType.APPLICATION_JSON})
-    public String getRenameMeCount() {
-       
-        long count = FACADE.getRenameMeCount();
-        //System.out.println("--------------->"+count);
-        return "{\"count\":"+count+"}";  //Done manually so no need for a DTO
+    public Response getChuckJoke(){
+        ChuckDTO chuckDTO = FACADE.fetchChuck();
+        return Response.ok().entity(chuckDTO).build();
     }
+
+    @GET
+    @Path("dad")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getDadJoke(){
+        DadDTO dadDTO = FACADE.fetchDad();
+        return Response.ok().entity(dadDTO).build();
+    }
+
+    @GET
+    @Path("combined")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getCombinedJoke(){
+        MyJokeDTO myJokeDTO = new MyJokeDTO(FACADE.fetchChuck(), FACADE.fetchDad());
+        return Response.ok().entity(myJokeDTO).build();
+    }
+
     @POST
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
     public Response postExample(String input){
-        RenameMeDTO rmdto = GSON.fromJson(input, RenameMeDTO.class);
+        ChuckDTO rmdto = GSON.fromJson(input, ChuckDTO.class);
         System.out.println(rmdto);
         return Response.ok().entity(rmdto).build();
     }
